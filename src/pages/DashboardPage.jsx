@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getUserSession } from '../auth/sessionController';
 import { cmsRoles, roleMenuGroups } from '../data/roleConfig';
+import { getStudentById } from '../data/studentData';
 import Layout from '../components/Layout';
 
 export default function DashboardPage() {
@@ -15,6 +16,19 @@ export default function DashboardPage() {
   const data = cmsRoles[role];
   const menuGroups = roleMenuGroups[role] || roleMenuGroups.student;
   const userId = sessionUserId || 'N/A';
+  const roleQuery = `?role=${encodeURIComponent(role)}`;
+  const knownStudent = sessionUserId ? getStudentById(sessionUserId) : null;
+  const fallbackStudentId = 'STU-2024-1547';
+
+  function handleOpenProfileDetails() {
+    if (role === 'student') {
+      const studentId = knownStudent ? sessionUserId : fallbackStudentId;
+      navigate(`/students/${encodeURIComponent(studentId)}${roleQuery}`);
+      return;
+    }
+
+    navigate(`/students${roleQuery}`);
+  }
 
   useEffect(() => {
     if (!sessionRole || !sessionUserId) {
@@ -22,7 +36,7 @@ export default function DashboardPage() {
       return undefined;
     }
 
-    document.title = `MIT Connect - ${data.label} Dashboard`;
+    document.title = 'MIT Connect - Dashboard';
 
     const expectedSearch = `?role=${encodeURIComponent(sessionRole)}`;
     if (location.search !== expectedSearch) {
@@ -40,13 +54,18 @@ export default function DashboardPage() {
   }, [data.label, location.search, navigate, sessionRole, sessionUserId]);
 
   return (
-    <Layout title={`${data.label} Dashboard`}>
+    <Layout title="Dashboard">
       <div className="profile-header">
         <div className="profile-left">
-          <div className="profile-avatar-wrap">
+          <button
+            type="button"
+            onClick={handleOpenProfileDetails}
+            className="profile-avatar-wrap bg-transparent border-0 cursor-pointer"
+            aria-label="Open student full details"
+          >
             <div className="avatar-initials">{data.label.slice(0, 2).toUpperCase()}</div>
             <span className="avatar-status" />
-          </div>
+          </button>
           <div className="profile-info">
             <div className="student-name">{data.name}</div>
             <div className="profile-meta">

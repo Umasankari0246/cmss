@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { getUserSession } from '../auth/sessionController'
 import { destroyUserSession } from '../auth/sessionController'
-import { roleMenuGroups } from '../data/roleConfig'
+import { cmsRoles, roleMenuGroups } from '../data/roleConfig'
 
 const iconMap = {
   Dashboard: 'dashboard',
@@ -49,6 +49,7 @@ export default function AcademicSidebar() {
   const navigate = useNavigate()
   const session = getUserSession()
   const role = session?.role || 'student'
+  const roleLabel = cmsRoles[role]?.label || 'Student'
   const menuGroups = roleMenuGroups[role] || []
 
   function handleLogout() {
@@ -63,8 +64,8 @@ export default function AcademicSidebar() {
           <span className="material-symbols-outlined text-2xl font-bold">school</span>
         </div>
         <div>
-          <h1 className="font-extrabold text-[#1e293b] text-xl tracking-tight leading-none">EduCore</h1>
-          <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-[0.1em] mt-1">Admin Portal</p>
+          <h1 className="font-extrabold text-[#1e293b] text-xl tracking-tight leading-none">MIT Connect</h1>
+          <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-[0.1em] mt-1">{roleLabel} Workspace</p>
         </div>
       </div>
 
