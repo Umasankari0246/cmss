@@ -11,6 +11,7 @@ import FacilityPage from './pages/FacilityPage';
 import SettingsPage from './pages/SettingsPage';
 import StudentsPage from './pages/StudentsPage';
 import StudentDetailPage from './pages/StudentDetailPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 export default function App() {
   const session = getUserSession();
@@ -41,6 +42,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         }
       />
