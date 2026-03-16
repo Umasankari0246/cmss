@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { destroyUserSession, getUserSession } from '../auth/sessionController';
 import { cmsRoles, roleMenuGroups } from '../data/roleConfig';
-<<<<<<< HEAD
 import { getStudentById } from '../data/studentData';
-import Layout from '../components/Layout';
-=======
+import NotificationBell from '../components/NotificationBell';
+import NotificationDropdown from '../components/NotificationDropdown';
 import TimetablePage from './TimetablePage';
 import AttendancePage from './AttendancePage';
 import ExamsPage from './ExamsPage';
@@ -35,13 +34,14 @@ function LogoutIcon() {
     </svg>
   );
 }
->>>>>>> 0eec7c31b0c5157183e14731cc9bfd7fe8fde4fe
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [activePage, setActivePage] = useState(null);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const pageMap = {
     '/timetable': TimetablePage,
@@ -124,27 +124,19 @@ export default function DashboardPage() {
   }
 
   return (
-<<<<<<< HEAD
-    <Layout title="Dashboard">
-      <div className="profile-header">
-        <div className="profile-left">
-          <button
-            type="button"
-            onClick={handleOpenProfileDetails}
-            className="profile-avatar-wrap bg-transparent border-0 cursor-pointer"
-            aria-label="Open student full details"
-          >
-            <div className="avatar-initials">{data.label.slice(0, 2).toUpperCase()}</div>
-            <span className="avatar-status" />
-          </button>
-          <div className="profile-info">
-            <div className="student-name">{data.name}</div>
-            <div className="profile-meta">
-              <span className="meta-item">ID: {userId}</span>
-              <span className="meta-item">Team: {data.team}</span>
-              <span className="meta-item">Focus: {data.focus}</span>
-=======
     <>
+      {!isSidebarVisible && (
+        <button
+          type="button"
+          className="sidebar-desktop-toggle"
+          onClick={() => setIsSidebarVisible(true)}
+          aria-label="Show sidebar"
+          title="Show sidebar"
+        >
+          <MenuIcon />
+        </button>
+      )}
+
       <div
         className={`sidebar-overlay${sidebarOpen ? ' active' : ''}`}
         onClick={() => setSidebarOpen(false)}
@@ -152,16 +144,24 @@ export default function DashboardPage() {
       />
 
       <div className="dashboard-wrapper role-layout">
-        <aside className={`sidebar${sidebarOpen ? ' open' : ''}`} id="sidebar">
+        <aside className={`sidebar${sidebarOpen ? ' open' : ''}${isSidebarVisible ? '' : ' hidden-desktop'}`} id="sidebar">
           <div className="sidebar-logo">
             <div className="logo-mark">
               <GraduationIcon />
             </div>
             <div className="logo-text-wrap">
               <div className="logo-title">MIT Connect</div>
-              <div className="logo-sub">MIT Connect - {data.label} Portal</div>
->>>>>>> 0eec7c31b0c5157183e14731cc9bfd7fe8fde4fe
+              <div className="logo-sub">{data.label} Portal</div>
             </div>
+            <button
+              type="button"
+              className="sidebar-toggle-btn"
+              onClick={() => setIsSidebarVisible(false)}
+              aria-label="Hide sidebar"
+              title="Hide sidebar"
+            >
+              <MenuIcon />
+            </button>
           </div>
 
           <nav className="sidebar-nav">
@@ -218,124 +218,154 @@ export default function DashboardPage() {
           </div>
         </aside>
 
-        <main className="main-content">
+        <main className={`main-content${isSidebarVisible ? '' : ' sidebar-hidden'}`}>
           <div className="topbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Toggle menu">
+              <button className="mobile-menu-btn" onClick={() => { setIsSidebarVisible(true); setSidebarOpen(true); }} aria-label="Toggle menu">
                 <MenuIcon />
               </button>
               <div className="topbar-left">
-                <h2>{activePage ? pageTitles[activePage] : `${data.label} Dashboard`}</h2>
+                <h2>{activePage ? pageTitles[activePage] : ''}</h2>
                 <p>{activePage ? pageSubtitles[activePage] : data.subtitle}</p>
               </div>
             </div>
             <div className="topbar-right">
+              <div style={{ position: 'relative' }}>
+                <NotificationBell
+                  role={role}
+                  onBellClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                />
+                <NotificationDropdown
+                  role={role}
+                  isOpen={isNotificationOpen}
+                  onClose={() => setIsNotificationOpen(false)}
+                />
+              </div>
               <span className="badge badge-info">{data.label}</span>
+              <button
+                type="button"
+                onClick={handleOpenProfileDetails}
+                className="profile-avatar-wrap bg-transparent border-0 cursor-pointer"
+                aria-label="Open profile details"
+                title="Open profile"
+              >
+                <div className="avatar-initials" style={{ width: 40, height: 40, fontSize: 14 }}>
+                  {data.label.slice(0, 2).toUpperCase()}
+                </div>
+                <span className="avatar-status" />
+              </button>
             </div>
           </div>
 
           {ActivePage && <ActivePage noLayout />}
-          {!ActivePage && (<>
-          <div className="profile-header">
-            <div className="profile-left">
-              <div className="profile-avatar-wrap">
-                <div className="avatar-initials">{data.label.slice(0, 2).toUpperCase()}</div>
-                <span className="avatar-status" />
-              </div>
-              <div className="profile-info">
-                <div className="student-name">{data.name}</div>
-                <div className="profile-meta">
-                  <span className="meta-item">ID: {userId}</span>
-                  <span className="meta-item">Team: {data.team}</span>
-                  <span className="meta-item">Focus: {data.focus}</span>
-                </div>
-              </div>
-            </div>
-            <div className="profile-right">
-              <button type="button" className="btn-primary-sm">
-                {data.primaryAction}
-              </button>
-              <button type="button" className="btn-secondary-sm">
-                {data.secondaryAction}
-              </button>
-            </div>
-          </div>
-
-          <div className="section-header">
-            <span className="section-title">Quick Overview</span>
-          </div>
-
-          <div className="stats-grid">
-            {data.stats.map((entry, index) => {
-              const tone = ['blue', 'green', 'purple', 'orange'][index % 4];
-              return (
-                <div key={entry.label} className={`stat-card stat-card-${tone}`}>
-                  <div className="stat-body">
-                    <div className="stat-value">{entry.value}</div>
-                    <div className="stat-label">{entry.label}</div>
-                    <div className="stat-sub">{entry.sub}</div>
+          {!ActivePage && (
+            <>
+              <div className="profile-header">
+                <div className="profile-left">
+                  <button
+                    type="button"
+                    onClick={handleOpenProfileDetails}
+                    className="profile-avatar-wrap bg-transparent border-0 cursor-pointer"
+                    aria-label="Open student full details"
+                  >
+                    <div className="avatar-initials">{data.label.slice(0, 2).toUpperCase()}</div>
+                    <span className="avatar-status" />
+                  </button>
+                  <div className="profile-info">
+                    <div className="student-name">{data.name}</div>
+                    <div className="profile-meta">
+                      <span className="meta-item">ID: {userId}</span>
+                      <span className="meta-item">Team: {data.team}</span>
+                      <span className="meta-item">Focus: {data.focus}</span>
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+                <div className="profile-right">
+                  <button type="button" className="btn-primary-sm">
+                    {data.primaryAction}
+                  </button>
+                  <button type="button" className="btn-secondary-sm">
+                    {data.secondaryAction}
+                  </button>
+                </div>
+              </div>
 
-          <div className="content-card">
-            <div className="section-header" style={{ marginBottom: 14 }}>
-              <span className="section-title">Section Access</span>
-            </div>
-            <div className="role-access-grid">
-              {menuGroups.map((group) => (
-                <div key={group.title} className="role-access-card">
-                  <h4>{group.title}</h4>
-                  <div className="role-chip-wrap">
-                    {group.items.map((item) => (
-                      <span key={item} className="badge badge-gray">
-                        {item}
-                      </span>
+              <div className="section-header">
+                <span className="section-title">Quick Overview</span>
+              </div>
+
+              <div className="stats-grid">
+                {data.stats.map((entry, index) => {
+                  const tone = ['blue', 'green', 'purple', 'orange'][index % 4];
+                  return (
+                    <div key={entry.label} className={`stat-card stat-card-${tone}`}>
+                      <div className="stat-body">
+                        <div className="stat-value">{entry.value}</div>
+                        <div className="stat-label">{entry.label}</div>
+                        <div className="stat-sub">{entry.sub}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="content-card">
+                <div className="section-header" style={{ marginBottom: 14 }}>
+                  <span className="section-title">Section Access</span>
+                </div>
+                <div className="role-access-grid">
+                  {menuGroups.map((group) => (
+                    <div key={group.title} className="role-access-card">
+                      <h4>{group.title}</h4>
+                      <div className="role-chip-wrap">
+                        {group.items.map((item) => (
+                          <span key={item} className="badge badge-gray">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bottom-grid">
+                <div className="content-card">
+                  <div className="section-header" style={{ marginBottom: 14 }}>
+                    <span className="section-title">Today Tasks</span>
+                  </div>
+                  <div className="notice-list">
+                    {data.tasks.map((task) => (
+                      <div key={task.title} className="notice-item">
+                        <div className="notice-dot dot-blue" />
+                        <div className="notice-text">
+                          <div className="notice-title">{task.title}</div>
+                          <div className="notice-desc">{task.desc}</div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="bottom-grid">
-            <div className="content-card">
-              <div className="section-header" style={{ marginBottom: 14 }}>
-                <span className="section-title">Today Tasks</span>
-              </div>
-              <div className="notice-list">
-                {data.tasks.map((task) => (
-                  <div key={task.title} className="notice-item">
-                    <div className="notice-dot dot-blue" />
-                    <div className="notice-text">
-                      <div className="notice-title">{task.title}</div>
-                      <div className="notice-desc">{task.desc}</div>
-                    </div>
+                <div className="content-card">
+                  <div className="section-header" style={{ marginBottom: 14 }}>
+                    <span className="section-title">Alerts</span>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="content-card">
-              <div className="section-header" style={{ marginBottom: 14 }}>
-                <span className="section-title">Alerts</span>
-              </div>
-              <div className="notice-list">
-                {data.alerts.map((alert, index) => (
-                  <div key={alert.title} className="notice-item">
-                    <div className={`notice-dot ${index % 2 === 0 ? 'dot-orange' : 'dot-red'}`} />
-                    <div className="notice-text">
-                      <div className="notice-title">{alert.title}</div>
-                      <div className="notice-desc">{alert.desc}</div>
-                    </div>
+                  <div className="notice-list">
+                    {data.alerts.map((alert, index) => (
+                      <div key={alert.title} className="notice-item">
+                        <div className={`notice-dot ${index % 2 === 0 ? 'dot-orange' : 'dot-red'}`} />
+                        <div className="notice-text">
+                          <div className="notice-title">{alert.title}</div>
+                          <div className="notice-desc">{alert.desc}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </div>
-          </>)}
+            </>
+          )}
         </main>
       </div>
     </>

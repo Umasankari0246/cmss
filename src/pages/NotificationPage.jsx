@@ -192,6 +192,7 @@ export default function NotificationsPage({ role: propRole }) {
   const navigate       = useNavigate();
   const [searchParams] = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const searchRef = useRef(null);
 
   const storedRole = localStorage.getItem('cmsRole') || 'student';
@@ -444,17 +445,38 @@ export default function NotificationsPage({ role: propRole }) {
         </div>
       )}
 
+      {!isSidebarVisible && (
+        <button
+          type="button"
+          className="sidebar-desktop-toggle"
+          onClick={() => setIsSidebarVisible(true)}
+          aria-label="Show sidebar"
+          title="Show sidebar"
+        >
+          <Icon.Menu />
+        </button>
+      )}
+
       <div className={`sidebar-overlay${sidebarOpen ? ' active' : ''}`} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
 
       <div className="dashboard-wrapper role-layout">
         {/* ── Sidebar ── */}
-        <aside className={`sidebar${sidebarOpen ? ' open' : ''}`} id="sidebar">
+        <aside className={`sidebar${sidebarOpen ? ' open' : ''}${isSidebarVisible ? '' : ' hidden-desktop'}`} id="sidebar">
           <div className="sidebar-logo">
             <div className="logo-mark"><Icon.Graduation /></div>
             <div className="logo-text-wrap">
               <div className="logo-title">MIT Connect</div>
               <div className="logo-sub">{data.label} Portal</div>
             </div>
+            <button
+              type="button"
+              className="sidebar-toggle-btn"
+              onClick={() => setIsSidebarVisible(false)}
+              aria-label="Hide sidebar"
+              title="Hide sidebar"
+            >
+              <Icon.Menu />
+            </button>
           </div>
           <nav className="sidebar-nav">
             {menuGroups.map((group, gi) => (
@@ -508,12 +530,12 @@ export default function NotificationsPage({ role: propRole }) {
         </aside>
 
         {/* ── Main ── */}
-        <main className="main-content">
+        <main className={`main-content${isSidebarVisible ? '' : ' sidebar-hidden'}`}>
 
           {/* Topbar */}
           <div className="topbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Toggle menu"><Icon.Menu /></button>
+              <button className="mobile-menu-btn" onClick={() => { setIsSidebarVisible(true); setSidebarOpen(true); }} aria-label="Toggle menu"><Icon.Menu /></button>
               <button type="button" onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0 12px', height: 36, fontSize: 13, fontWeight: 500, color: '#6b7280', cursor: 'pointer' }}>
                 <Icon.Back /> Back
               </button>
