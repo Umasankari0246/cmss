@@ -451,7 +451,7 @@ export default function AttendancePage({ noLayout = false }) {
         )}
 
         {isAdmin && (
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-row items-center gap-3">
             {/* Search */}
             <div className="relative">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
