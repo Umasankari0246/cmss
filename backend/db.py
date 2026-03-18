@@ -1,12 +1,14 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from urllib.parse import urlsplit
 
-load_dotenv()
+# Always load .env from the backend folder, independent of process CWD.
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
 # Use Atlas connection string
 MONGODB_URI = os.getenv("MONGODB_URI") or "mongodb+srv://priyadharshini:Ezhilithanya@cluster0.crvutrr.mongodb.net/College_db"
@@ -38,9 +40,15 @@ async def lifespan(app):
         await client.admin.command("ping")
 
         try:
+<<<<<<< HEAD
             db = client["College_db"] if "mongodb.net" in str(MONGODB_URI) else client.get_database()
             if db.name == "test" and "mongodb.net" not in str(MONGODB_URI):
                 db = client["College_db"]
+=======
+            db = client.get_database()
+            if db.name == "test":
+                db = client["cms"]
+>>>>>>> c10e7d5074fee957e11486f5f75b3bb8cdb2b414
         except Exception:
             db = client["College_db"]
 

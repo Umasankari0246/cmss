@@ -112,7 +112,11 @@ export const roleMenuGroups = {
     },
     {
       title: 'Academics',
+<<<<<<< HEAD
       items: ['Exams', 'Timetable', 'Attendance', 'Placement', 'Facility'],
+=======
+      items: ['Exams', 'Timetable', 'Attendance', 'Placement'],
+>>>>>>> c10e7d5074fee957e11486f5f75b3bb8cdb2b414
     },
     {
       title: 'Administration',
@@ -148,7 +152,11 @@ export const roleMenuGroups = {
     },
     {
       title: 'Academics',
+<<<<<<< HEAD
       items: ['Exams', 'Timetable', 'Attendance', 'Placement'],
+=======
+      items: ['Exams', 'Timetable', 'Attendance', 'Placement', 'Facility'],
+>>>>>>> c10e7d5074fee957e11486f5f75b3bb8cdb2b414
     },
     {
       title: 'Intelligence',

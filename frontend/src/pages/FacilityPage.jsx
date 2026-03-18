@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { getUserSession } from '../auth/sessionController'
 
-const facilities = [
+const FALLBACK_FACILITIES = [
   { name: 'Computer Lab 4', type: 'Laboratory',   capacity: 40,  status: 'Available',   amenities: ['AC', 'Projector', '40 PCs'] },
   { name: 'Hall A',         type: 'Lecture Hall', capacity: 120, status: 'In Use',       amenities: ['AC', 'Mic System', 'Projector'] },
   { name: 'Room 302',       type: 'Classroom',    capacity: 60,  status: 'Available',   amenities: ['Whiteboard', 'Projector'] },
@@ -19,15 +19,32 @@ const statusStyle = {
 
 export default function FacilityPage({ noLayout = false }) {
   const session = getUserSession()
-  const role = localStorage.getItem('role') || session?.role || 'student'
+  const role = session?.role || 'student'
 
+  const [facilities, setFacilities] = useState(FALLBACK_FACILITIES)
   const [statusFilter, setStatusFilter] = useState('All')
   const [filterOpen, setFilterOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingForm, setBookingForm] = useState({ room: '', date: '', timeFrom: '', timeTo: '', purpose: '' })
   const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [addFacilityOpen, setAddFacilityOpen] = useState(false)
+  const [addFacilityForm, setAddFacilityForm] = useState({ name: '', type: '', capacity: 30, status: 'Available', amenities: '' })
+  const [addFacilitySuccess, setAddFacilitySuccess] = useState(false)
   const filterRef = useRef(null)
+
+  useEffect(() => {
+    async function fetchFacilities() {
+      try {
+        const res = await fetch('/api/academics/facilities')
+        const json = await res.json().catch(() => null)
+        if (json?.success && json.data.length > 0) setFacilities(json.data)
+      } catch (err) {
+        console.error('Failed to fetch facilities:', err)
+      }
+    }
+    fetchFacilities()
+  }, [])
 
   const visibleFacilities = role === 'admin'
     ? facilities
@@ -48,26 +65,89 @@ export default function FacilityPage({ noLayout = false }) {
 
   const availableRooms = visibleFacilities.filter(f => f.status === 'Available')
 
-  function handleBookRoom(e) {
+  async function handleBookRoom(e) {
     e.preventDefault()
-    setBookingSuccess(true)
-    setTimeout(() => {
-      setBookingOpen(false)
-      setBookingSuccess(false)
-      setBookingForm({ room: '', date: '', timeFrom: '', timeTo: '', purpose: '' })
-    }, 1500)
+    try {
+      const res = await fetch('/api/academics/facilities/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...bookingForm, requestedBy: session?.userId || '' }),
+      })
+      const json = await res.json().catch(() => null)
+      if (json?.success) {
+        setFacilities(prev => prev.map(f => f.name === bookingForm.room ? { ...f, status: 'In Use' } : f))
+        setBookingSuccess(true)
+        setTimeout(() => {
+          setBookingOpen(false)
+          setBookingSuccess(false)
+          setBookingForm({ room: '', date: '', timeFrom: '', timeTo: '', purpose: '' })
+        }, 1500)
+        return
+      }
+      window.alert(json?.detail || 'Booking failed. Please try again.')
+    } catch (err) {
+      console.error('Failed to book room:', err)
+      window.alert('Booking failed. Please check backend connection and try again.')
+    }
+  }
+
+  async function handleAddFacility(e) {
+    e.preventDefault()
+    try {
+      const amenitiesArray = addFacilityForm.amenities
+        .split(',')
+        .map(a => a.trim())
+        .filter(a => a)
+
+      const payload = {
+        name: addFacilityForm.name,
+        type: addFacilityForm.type,
+        capacity: parseInt(addFacilityForm.capacity),
+        status: addFacilityForm.status,
+        amenities: amenitiesArray,
+      }
+
+      const res = await fetch('/api/academics/facilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json().catch(() => null)
+      if (json?.success) {
+        setFacilities(prev => [...prev, json.data])
+        setAddFacilitySuccess(true)
+        setTimeout(() => {
+          setAddFacilityOpen(false)
+          setAddFacilitySuccess(false)
+          setAddFacilityForm({ name: '', type: '', capacity: 30, status: 'Available', amenities: '' })
+        }, 1500)
+        return
+      }
+      window.alert(json?.detail || 'Failed to add facility. Please try again.')
+    } catch (err) {
+      console.error('Failed to add facility:', err)
+      window.alert('Failed to add facility. Please check backend connection and try again.')
+    }
   }
 
   const inner = (
     <>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         {role === 'admin' && (
-          <button
-            onClick={() => setBookingOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1162d4] text-white rounded-lg text-sm font-semibold hover:bg-[#1162d4]/90 transition-colors"
-          >
-            <span className="material-symbols-outlined text-lg">add</span>Book Room
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setAddFacilityOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">add_circle</span>Add Facility
+            </button>
+            <button
+              onClick={() => setBookingOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#1162d4] text-white rounded-lg text-sm font-semibold hover:bg-[#1162d4]/90 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>Book Room
+            </button>
+          </div>
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -267,6 +347,117 @@ export default function FacilityPage({ noLayout = false }) {
                       className="flex-1 px-4 py-2.5 bg-[#1162d4] text-white rounded-lg text-sm font-semibold hover:bg-[#1162d4]/90 transition-colors"
                     >
                       Confirm Booking
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Facility Modal */}
+      {role === 'admin' && addFacilityOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setAddFacilityOpen(false)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl md:min-h-[31rem] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {addFacilitySuccess ? (
+              <div className="p-8 text-center">
+                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-3xl text-green-600">check_circle</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Facility Added!</h3>
+                <p className="text-sm text-slate-500 mt-1">Your new facility has been created successfully.</p>
+              </div>
+            ) : (
+              <>
+                <div className="p-6 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-600/10 rounded-lg">
+                      <span className="material-symbols-outlined text-green-600">add_circle</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900">Add New Facility</h3>
+                  </div>
+                  <button onClick={() => setAddFacilityOpen(false)} className="p-1 hover:bg-slate-100 rounded-full transition-colors">
+                    <span className="material-symbols-outlined text-slate-400">close</span>
+                  </button>
+                </div>
+                <form onSubmit={handleAddFacility} className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2 flex flex-col gap-2">
+                      <label className="text-sm font-semibold text-slate-700">Facility Name <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Computer Lab 1, Hall B"
+                        value={addFacilityForm.name}
+                        onChange={e => setAddFacilityForm({ ...addFacilityForm, name: e.target.value })}
+                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-colors"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-semibold text-slate-700">Type <span className="text-red-500">*</span></label>
+                      <select
+                        required
+                        value={addFacilityForm.type}
+                        onChange={e => setAddFacilityForm({ ...addFacilityForm, type: e.target.value })}
+                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-colors"
+                      >
+                        <option value="">Select Type</option>
+                        <option value="Classroom">Classroom</option>
+                        <option value="Lecture Hall">Lecture Hall</option>
+                        <option value="Laboratory">Laboratory</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Conference Room">Conference Room</option>
+                        <option value="Auditorium">Auditorium</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-semibold text-slate-700">Capacity <span className="text-red-500">*</span></label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        value={addFacilityForm.capacity}
+                        onChange={e => setAddFacilityForm({ ...addFacilityForm, capacity: e.target.value })}
+                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-colors"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-semibold text-slate-700">Status</label>
+                      <select
+                        value={addFacilityForm.status}
+                        onChange={e => setAddFacilityForm({ ...addFacilityForm, status: e.target.value })}
+                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-colors"
+                      >
+                        <option value="Available">Available</option>
+                        <option value="In Use">In Use</option>
+                        <option value="Maintenance">Maintenance</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2 flex flex-col gap-2">
+                      <label className="text-sm font-semibold text-slate-700">Amenities <span className="text-slate-500 text-xs font-normal">(comma-separated)</span></label>
+                      <input
+                        type="text"
+                        placeholder="e.g. AC, Projector, Wi-Fi, CCTV"
+                        value={addFacilityForm.amenities}
+                        onChange={e => setAddFacilityForm({ ...addFacilityForm, amenities: e.target.value })}
+                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mt-6 pt-6 border-t border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setAddFacilityOpen(false)}
+                      className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors"
+                    >
+                      Add Facility
                     </button>
                   </div>
                 </form>

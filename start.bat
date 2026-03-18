@@ -16,7 +16,16 @@ if errorlevel 1 (
   exit /b 1
 )
 
+<<<<<<< HEAD
 echo [1/5] Installing frontend dependencies...
+=======
+if not exist "%FRONTEND_DIR%\package.json" (
+  echo frontend\package.json not found. Frontend startup cannot continue.
+  exit /b 1
+)
+
+echo [1/4] Installing frontend dependencies...
+>>>>>>> c10e7d5074fee957e11486f5f75b3bb8cdb2b414
 cd /d "%FRONTEND_DIR%"
 call npm install
 if errorlevel 1 (
@@ -46,7 +55,10 @@ if exist "%BACKEND_DIR%\main.py" (
   echo backend\main.py not found. FastAPI backend was not started.
 )
 
+<<<<<<< HEAD
 echo [5/5] Starting frontend server...
+=======
+>>>>>>> c10e7d5074fee957e11486f5f75b3bb8cdb2b414
 start "MIT Connect Frontend" cmd /k "cd /d ""%FRONTEND_DIR%"" && npm run dev"
 
 echo.
