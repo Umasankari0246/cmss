@@ -3,9 +3,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from pymongo import ReturnDocument
 
-from backend.db import get_db
-from backend.schemas.payroll import PayrollRecord, PayrollUpdate
-from backend.utils.mongo import parse_object_id, serialize_doc
+from db import get_db
+from schemas.payroll import PayrollRecord, PayrollUpdate
+from utils.mongo import parse_object_id, serialize_doc
 
 router = APIRouter(prefix="/api/payroll", tags=["payroll"])
 

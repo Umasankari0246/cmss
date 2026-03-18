@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from backend.db import get_db
-from backend.utils.mongo import serialize_doc
+from db import get_db
+from utils.mongo import serialize_doc
 
 router = APIRouter(prefix="/api/staff", tags=["staff"])
 

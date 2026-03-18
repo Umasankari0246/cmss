@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import ReturnDocument
 
-from backend.db import get_db
-from backend.dev_store import get_timetable as get_dev_timetable
-from backend.dev_store import list_timetables as list_dev_timetables
-from backend.dev_store import upsert_timetable as upsert_dev_timetable
-from backend.schemas.academics import TimetableRecord
-from backend.utils.mongo import serialize_doc
+from db import get_db
+from dev_store import get_timetable as get_dev_timetable
+from dev_store import list_timetables as list_dev_timetables
+from dev_store import upsert_timetable as upsert_dev_timetable
+from schemas.academics import TimetableRecord
+from utils.mongo import serialize_doc
 
 router = APIRouter(prefix="/api/academics/timetable", tags=["academics:timetable"])
 

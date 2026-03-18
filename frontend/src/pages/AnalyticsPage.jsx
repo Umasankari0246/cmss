@@ -34,7 +34,7 @@ const YEAR_RANGES = [
   { label: '2025-2029', start: '2025', end: '2029' }
 ];
 const SEMESTER_OPTS = ['Semester 4 (Current)','Semester 3','Semester 2','Semester 1'];
-const DEPT_OPTS = ['All Departments','Computer Science','Physics','Mathematics','Electronics','Mechanical'];
+const DEPT_OPTS = ['All Departments','CS','ME','EE','ECE','Computer Science'];
 
 // Helper functions
 function myToKey(year){return parseInt(year);}
@@ -1416,13 +1416,13 @@ function AdminView({activeYears,rangeLabel,department,semester,year}){
         const semesterMatch = semester.match(/\d+/);
         const semesterNum = semesterMatch ? parseInt(semesterMatch[0]) : null;
         
-        // Get department code (e.g., "CSE" from "Computer Science" or pass directly)
+        // Get department code (e.g., "CS" from "CS" or pass directly)
         const deptCode = department === 'All Departments' ? null : 
-                        department === 'Computer Science' ? 'CSE' :
-                        department === 'Physics' ? 'Physics' :
-                        department === 'Mathematics' ? 'Mathematics' :
-                        department === 'Electronics' ? 'Electronics' :
-                        department === 'Mechanical' ? 'Mechanical' : null;
+                        department === 'CS' ? 'CS' :
+                        department === 'ME' ? 'ME' :
+                        department === 'EE' ? 'EE' :
+                        department === 'ECE' ? 'ECE' :
+                        department === 'Computer Science' ? 'Computer Science' : null;
         
         // Fetch real data from MongoDB with filters
         const data = await getRealAnalyticsData(parseInt(year), semesterNum, deptCode);
@@ -1465,9 +1465,9 @@ function AdminView({activeYears,rangeLabel,department,semester,year}){
     );
   }
 
-  const filteredDepartmentData = department === 'All Departments' 
+  const filteredDepartmentData = department === DEPT_OPTS[0] 
     ? analyticsData.departmentData 
-    : analyticsData.departmentData.filter(dept => dept.name === department);
+    : analyticsData.departmentData.filter(dept => dept.name && dept.name.toLowerCase().trim() === department.toLowerCase().trim());
 
   // Debug: Log the data being used for the chart
   console.log('Department Chart Data:', filteredDepartmentData);
@@ -1796,7 +1796,7 @@ function downloadReport(role, activeYears, rangeLabel, semester, department, yea
   URL.revokeObjectURL(url);
 }
 
-export default function AnalyticsPage({role:propRole}){
+export default function AnalyticsPage({role:propRole, noLayout}){
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);

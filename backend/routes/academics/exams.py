@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import ReturnDocument
 
-from backend.db import get_db
-from backend.dev_store import create_exam as create_dev_exam
-from backend.dev_store import delete_exam as delete_dev_exam
-from backend.dev_store import list_items
-from backend.dev_store import update_exam as update_dev_exam
-from backend.schemas.academics import ExamCreate, ExamUpdate
-from backend.utils.mongo import parse_object_id, serialize_doc
+from db import get_db
+from dev_store import create_exam as create_dev_exam
+from dev_store import delete_exam as delete_dev_exam
+from dev_store import list_items
+from dev_store import update_exam as update_dev_exam
+from schemas.academics import ExamCreate, ExamUpdate
+from utils.mongo import parse_object_id, serialize_doc
 
 router = APIRouter(prefix="/api/exams", tags=["academics:exams"])
 

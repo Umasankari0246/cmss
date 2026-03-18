@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from backend.db import get_db
-from backend.dev_store import create_attendance as create_dev_attendance
-from backend.dev_store import list_attendance as list_dev_attendance
-from backend.dev_store import list_weekly_attendance
-from backend.schemas.academics import AttendanceRecord, WeeklyAttendancePoint
-from backend.utils.mongo import serialize_doc
+from db import get_db
+from dev_store import create_attendance as create_dev_attendance
+from dev_store import list_attendance as list_dev_attendance
+from dev_store import list_weekly_attendance
+from schemas.academics import AttendanceRecord, WeeklyAttendancePoint
+from utils.mongo import serialize_doc
 
 router = APIRouter(prefix="/api/academics/attendance", tags=["academics:attendance"])
 

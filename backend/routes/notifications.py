@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import ReturnDocument
 
-from backend.db import get_db
-from backend.dev_store import clear_notifications as clear_dev_notifications
-from backend.dev_store import create_notification as create_dev_notification
-from backend.dev_store import delete_notification as delete_dev_notification
-from backend.dev_store import list_notifications as list_dev_notifications
-from backend.dev_store import mark_notification_read as mark_dev_notification_read
-from backend.dev_store import mark_role_notifications_read as mark_dev_role_notifications_read
-from backend.dev_store import unread_notifications as unread_dev_notifications
-from backend.schemas.common import NotificationCreate
-from backend.utils.mongo import parse_object_id, serialize_doc
+from db import get_db
+from dev_store import clear_notifications as clear_dev_notifications
+from dev_store import create_notification as create_dev_notification
+from dev_store import delete_notification as delete_dev_notification
+from dev_store import list_notifications as list_dev_notifications
+from dev_store import mark_notification_read as mark_dev_notification_read
+from dev_store import mark_role_notifications_read as mark_dev_role_notifications_read
+from dev_store import unread_notifications as unread_dev_notifications
+from schemas.common import NotificationCreate
+from utils.mongo import parse_object_id, serialize_doc
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 

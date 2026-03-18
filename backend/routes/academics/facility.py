@@ -1,15 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import ReturnDocument
 
-from backend.db import get_db
-from backend.dev_store import create_booking as create_dev_booking
-from backend.dev_store import create_facility as create_dev_facility
-from backend.dev_store import delete_facility as delete_dev_facility
-from backend.dev_store import list_bookings as list_dev_bookings
-from backend.dev_store import list_facilities as list_dev_facilities
-from backend.dev_store import update_facility as update_dev_facility
-from backend.schemas.academics import FacilityBooking, FacilityRecord
-from backend.utils.mongo import parse_object_id, serialize_doc
+from db import get_db
+from dev_store import create_booking as create_dev_booking
+from dev_store import create_facility as create_dev_facility
+from dev_store import delete_facility as delete_dev_facility
+from dev_store import list_bookings as list_dev_bookings
+from dev_store import list_facilities as list_dev_facilities
+from dev_store import update_facility as update_dev_facility
+from schemas.academics import FacilityBooking, FacilityRecord
+from utils.mongo import parse_object_id, serialize_doc
 
 router = APIRouter(prefix="/api/academics/facilities", tags=["academics:facility"])
 

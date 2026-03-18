@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import ReturnDocument
 
-from backend.db import get_db
-from backend.dev_store import create_placement as create_dev_placement
-from backend.dev_store import delete_placement as delete_dev_placement
-from backend.dev_store import list_placements as list_dev_placements
-from backend.dev_store import update_placement as update_dev_placement
-from backend.schemas.academics import PlacementEntry
-from backend.utils.mongo import parse_object_id, serialize_doc
+from db import get_db
+from dev_store import create_placement as create_dev_placement
+from dev_store import delete_placement as delete_dev_placement
+from dev_store import list_placements as list_dev_placements
+from dev_store import update_placement as update_dev_placement
+from schemas.academics import PlacementEntry
+from utils.mongo import parse_object_id, serialize_doc
 
 router = APIRouter(prefix="/api/academics/placement", tags=["academics:placement"])
 

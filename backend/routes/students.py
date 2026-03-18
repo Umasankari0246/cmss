@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
-from backend.db import get_db
-from backend.schemas.common import StudentRecord
-from backend.utils.mongo import serialize_doc
+from db import get_db
+from schemas.common import StudentRecord
+from utils.mongo import serialize_doc
 
 router = APIRouter(prefix="/api/students", tags=["students"])
 

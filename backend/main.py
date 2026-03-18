@@ -6,17 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.db import lifespan
-from backend.routes.academics.attendance import router as attendance_router
-from backend.routes.academics.exams import router as exams_router
-from backend.routes.academics.facility import router as facility_router
-from backend.routes.academics.placement import router as placement_router
-from backend.routes.academics.timetable import router as timetable_router
-from backend.routes.analytics import router as analytics_router
-from backend.routes.notifications import router as notifications_router
-from backend.routes.payroll import router as payroll_router
-from backend.routes.staff import router as staff_router
-from backend.routes.students import router as students_router
+from db import lifespan
+from routes.academics.attendance import router as attendance_router
+from routes.academics.exams import router as exams_router
+from routes.academics.facility import router as facility_router
+from routes.academics.placement import router as placement_router
+from routes.academics.timetable import router as timetable_router
+from routes.analytics import router as analytics_router
+from routes.notifications import router as notifications_router
+from routes.payroll import router as payroll_router
+from routes.staff import router as staff_router
+from routes.students import router as students_router
 
 PORT = int(os.getenv("PORT", 5000))
 
@@ -74,4 +74,4 @@ async def serve_react_app(full_path: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="127.0.0.1", port=5000)
+    uvicorn.run("main:app", host="127.0.0.1", port=5000)
