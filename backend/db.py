@@ -8,7 +8,8 @@ from urllib.parse import urlsplit
 
 load_dotenv()
 
-MONGODB_URI = os.getenv("MONGODB_URI")
+# Use Atlas connection string
+MONGODB_URI = os.getenv("MONGODB_URI") or "mongodb+srv://priyadharshini:Ezhilithanya@cluster0.crvutrr.mongodb.net/College_db"
 
 client: AsyncIOMotorClient | None = None
 db = None
@@ -37,11 +38,11 @@ async def lifespan(app):
         await client.admin.command("ping")
 
         try:
-            db = client["cms"] if "mongodb.net" in str(MONGODB_URI) else client.get_database()
+            db = client["College_db"] if "mongodb.net" in str(MONGODB_URI) else client.get_database()
             if db.name == "test" and "mongodb.net" not in str(MONGODB_URI):
-                db = client["cms"]
+                db = client["College_db"]
         except Exception:
-            db = client["cms"]
+            db = client["College_db"]
 
 
 

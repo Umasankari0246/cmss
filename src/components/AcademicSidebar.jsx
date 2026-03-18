@@ -57,7 +57,7 @@ export default function AcademicSidebar({ onToggleSidebar }) {
   }
 
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col fixed h-full overflow-y-auto z-20">
+    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col fixed h-full overflow-y-auto z-50">
       <div className="p-6 flex items-center gap-3 relative">
         <button
           onClick={onToggleSidebar}
@@ -85,15 +85,22 @@ export default function AcademicSidebar({ onToggleSidebar }) {
             <div className="space-y-1">
               {group.items.map((item) => {
                 const to = `${routeMap[item] || '#'}${role !== 'student' && item !== 'Settings' ? `?role=${encodeURIComponent(role)}` : ''}`
+                const handleClick = (e) => {
+                  console.log('Sidebar item clicked:', { item, to, role })
+                  
+                  // Use React Router navigation for all items
+                  navigate(to)
+                }
                 return (
-                  <NavLink
+                  <button
                     key={item}
-                    to={to}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                    onClick={handleClick}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-900 relative z-10 w-full text-left"
+                    style={{ pointerEvents: 'auto' }}
                   >
                     <span className="material-symbols-outlined text-[22px]">{iconMap[item] || 'circle'}</span>
                     <span>{item}</span>
-                  </NavLink>
+                  </button>
                 )
               })}
             </div>

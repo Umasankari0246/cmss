@@ -12,6 +12,7 @@ from backend.routes.academics.exams import router as exams_router
 from backend.routes.academics.facility import router as facility_router
 from backend.routes.academics.placement import router as placement_router
 from backend.routes.academics.timetable import router as timetable_router
+from backend.routes.analytics import router as analytics_router
 from backend.routes.notifications import router as notifications_router
 from backend.routes.payroll import router as payroll_router
 from backend.routes.staff import router as staff_router
@@ -52,6 +53,7 @@ async def serve_frontend():
 
 app.include_router(staff_router)
 app.include_router(payroll_router)
+app.include_router(analytics_router)
 app.include_router(exams_router)
 app.include_router(timetable_router)
 app.include_router(attendance_router)
