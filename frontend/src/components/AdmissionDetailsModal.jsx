@@ -4,8 +4,6 @@ export default function AdmissionDetailsModal({ isOpen, onClose, application }) 
   if (!isOpen || !application) return null;
 
   const isStudent = application.type === 'student';
-  const documents = application.documents || {};
-  const paymentStatus = application.paymentStatus || application.payment_status || 'Pending';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -107,92 +105,40 @@ export default function AdmissionDetailsModal({ isOpen, onClose, application }) 
                       <p className="font-semibold text-gray-800">{application.course}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Course Category</p>
-                      <p className="font-semibold text-gray-800">{application.courseCategory}</p>
+                      <p className="text-sm text-gray-600">Semester</p>
+                      <p className="font-semibold text-gray-800">{application.semester}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Previous School</p>
-                      <p className="font-semibold text-gray-800">{application.previousSchool}</p>
+                      <p className="text-sm text-gray-600">Roll Number</p>
+                      <p className="font-semibold text-gray-800">{application.roll}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Board</p>
-                      <p className="font-semibold text-gray-800">{application.board}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Year of Passing</p>
-                      <p className="font-semibold text-gray-800">{application.yearOfPassing}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Marks / Percentage</p>
-                      <p className="font-semibold text-gray-800">{application.marksPercentage}</p>
+                      <p className="text-sm text-gray-600">CGPA</p>
+                      <p className="font-semibold text-gray-800">{application.cgpa}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-gray-800 mb-4 text-lg">Admission Details</h3>
+                  <h3 className="font-bold text-gray-800 mb-4 text-lg">Address</h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-600">Quota</p>
-                      <p className="font-semibold text-gray-800">{application.quota}</p>
+                      <p className="text-sm text-gray-600">Address</p>
+                      <p className="font-semibold text-gray-800">{application.address}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Accommodation</p>
-                      <p className="font-semibold text-gray-800">{application.accommodation}</p>
-                    </div>
-                    {application.roomType && (
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <p className="text-sm text-gray-600">Room Type</p>
-                        <p className="font-semibold text-gray-800">{application.roomType}</p>
+                        <p className="text-sm text-gray-600">City</p>
+                        <p className="font-semibold text-gray-800">{application.city}</p>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-4 text-lg">Uploaded Documents</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-gray-600">Passport Photo</p>
-                      <p className="font-semibold text-gray-800">{documents.passportPhoto || 'Not uploaded'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Aadhaar Card</p>
-                      <p className="font-semibold text-gray-800">{documents.aadhaarCard || 'Not uploaded'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Marksheet</p>
-                      <p className="font-semibold text-gray-800">{documents.marksheet || 'Not uploaded'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Transfer Certificate</p>
-                      <p className="font-semibold text-gray-800">{documents.transferCertificate || 'Not uploaded'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-4 text-lg">Payment Details</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-gray-600">Application Fee</p>
-                      <p className="font-semibold text-gray-800">₹{application.applicationFee || 500}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Payment Method</p>
-                      <p className="font-semibold text-gray-800">{application.paymentMethod || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Transaction ID</p>
-                      <p className="font-semibold text-gray-800">{application.transactionId || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Date & Time</p>
-                      <p className="font-semibold text-gray-800">{application.paymentDateTime || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Payment Status</p>
-                      <p className="font-semibold text-gray-800">{paymentStatus}</p>
+                      <div>
+                        <p className="text-sm text-gray-600">State</p>
+                        <p className="font-semibold text-gray-800">{application.state}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Pincode</p>
+                        <p className="font-semibold text-gray-800">{application.pincode}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -238,7 +184,7 @@ export default function AdmissionDetailsModal({ isOpen, onClose, application }) 
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-600">ID</p>
-                  <p className="font-semibold text-gray-800">{application.id || application.studentId}</p>
+                  <p className="font-semibold text-gray-800">{application.id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Created Date</p>

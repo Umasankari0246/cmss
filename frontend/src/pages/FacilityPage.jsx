@@ -73,16 +73,19 @@ export default function FacilityPage({ noLayout = false }) {
       const json = await res.json().catch(() => null)
       if (json?.success) {
         setFacilities(prev => prev.map(f => f.name === bookingForm.room ? { ...f, status: 'In Use' } : f))
+        setBookingSuccess(true)
+        setTimeout(() => {
+          setBookingOpen(false)
+          setBookingSuccess(false)
+          setBookingForm({ room: '', date: '', timeFrom: '', timeTo: '', purpose: '' })
+        }, 1500)
+        return
       }
+      window.alert(json?.detail || 'Booking failed. Please try again.')
     } catch (err) {
       console.error('Failed to book room:', err)
+      window.alert('Booking failed. Please check backend connection and try again.')
     }
-    setBookingSuccess(true)
-    setTimeout(() => {
-      setBookingOpen(false)
-      setBookingSuccess(false)
-      setBookingForm({ room: '', date: '', timeFrom: '', timeTo: '', purpose: '' })
-    }, 1500)
   }
 
   const inner = (

@@ -207,14 +207,8 @@ export default function AdmissionPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          (app.paymentStatus || app.payment_status || 'Pending').toLowerCase() === 'paid'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-orange-100 text-orange-800'
-                        }`}
-                      >
-                        {app.paymentStatus || app.payment_status || 'Pending'}
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">
+                        Pending
                       </span>
                     </td>
                     <td className="py-3 px-4">

@@ -23,6 +23,27 @@ export default function PlacementPage({ noLayout = false }) {
   const [filterOpen, setFilterOpen] = useState(false)
   const filterRef = useRef(null)
 
+  const loadPlacements = async (overrides = {}) => {
+    try {
+      const params = new URLSearchParams()
+      const effectiveStatus = overrides.statusFilter ?? statusFilter
+      const effectiveSearch = overrides.searchQuery ?? searchQuery
+
+      if (isStudent && sessionUserId) params.set('person_id', sessionUserId)
+      if (effectiveStatus && effectiveStatus !== 'All') params.set('status', effectiveStatus)
+      if (effectiveSearch?.trim()) params.set('search', effectiveSearch.trim())
+
+      const query = params.toString()
+      const res = await fetch(`/api/academics/placement${query ? `?${query}` : ''}`)
+      const json = await res.json().catch(() => null)
+      if (json?.success && Array.isArray(json.data)) {
+        setEntries(json.data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch placements:', err)
+    }
+  }
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (filterRef.current && !filterRef.current.contains(e.target)) setFilterOpen(false)
@@ -32,18 +53,16 @@ export default function PlacementPage({ noLayout = false }) {
   }, [])
 
   useEffect(() => {
-    async function fetchPlacements() {
-      try {
-        const params = isStudent ? `?person_id=${encodeURIComponent(sessionUserId)}` : ''
-        const res = await fetch(`/api/academics/placement${params}`)
-        const json = await res.json().catch(() => null)
-        if (json?.success && Array.isArray(json.data)) setEntries(json.data)
-      } catch (err) {
-        console.error('Failed to fetch placements:', err)
-      }
-    }
-    fetchPlacements()
-  }, [])
+    loadPlacements({ statusFilter: 'All', searchQuery: '' })
+  }, [isStudent, sessionUserId])
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      loadPlacements()
+    }, 250)
+
+    return () => clearTimeout(debounce)
+  }, [statusFilter, searchQuery, isStudent, sessionUserId])
 
   const visibleEntries = isStudent
     ? entries.filter((p) => p.ownerId === sessionUserId)
@@ -88,7 +107,7 @@ export default function PlacementPage({ noLayout = false }) {
           body: JSON.stringify(payload),
         })
         const json = await res.json().catch(() => null)
-        if (json?.success) setEntries(prev => prev.map(e => (e.id || e._id) === id ? json.data : e))
+        if (json?.success) await loadPlacements()
       } else {
         const res = await fetch('/api/academics/placement', {
           method: 'POST',
@@ -96,7 +115,7 @@ export default function PlacementPage({ noLayout = false }) {
           body: JSON.stringify(payload),
         })
         const json = await res.json().catch(() => null)
-        if (json?.success) setEntries(prev => [...prev, json.data])
+        if (json?.success) await loadPlacements()
       }
     } catch (err) {
       console.error('Failed to save placement:', err)
@@ -112,7 +131,7 @@ export default function PlacementPage({ noLayout = false }) {
     try {
       const res = await fetch(`/api/academics/placement/${id}`, { method: 'DELETE' })
       const json = await res.json().catch(() => null)
-      if (json?.success) setEntries(prev => prev.filter(e => (e.id || e._id) !== id))
+      if (json?.success) await loadPlacements()
     } catch (err) {
       console.error('Failed to delete placement:', err)
     }

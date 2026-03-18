@@ -41,10 +41,7 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
     marksheet: null,
     transferCertificate: null,
     // Step 7: Application Fee
-    applicationFee: 500,
     paymentMethod: '',
-    paymentTransactionId: '',
-    paymentDateTime: '',
     // Step 8: Review will use all above data
   });
 
@@ -75,15 +72,6 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
   };
 
   const handlePayment = () => {
-    const transactionId = `TXN${Date.now()}`;
-    const paymentDateTime = new Date().toLocaleString();
-
-    setFormData((prev) => ({
-      ...prev,
-      paymentTransactionId: transactionId,
-      paymentDateTime,
-    }));
-
     setPaymentDone(true);
     setTimeout(() => {
       handleNext();
@@ -91,10 +79,7 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
   };
 
   const handleSubmit = () => {
-    const generatedStudentId = `STU${Math.floor(Math.random() * 900 + 100)}`;
-
     const studentData = {
-      studentId: generatedStudentId,
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
@@ -109,17 +94,7 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
       quota: formData.quota,
       accommodation: formData.accommodation,
       roomType: formData.roomType,
-      documents: {
-        passportPhoto: formData.passportPhoto?.name || '',
-        aadhaarCard: formData.aadhaarCard?.name || '',
-        marksheet: formData.marksheet?.name || '',
-        transferCertificate: formData.transferCertificate?.name || '',
-      },
-      applicationFee: formData.applicationFee,
-      paymentMethod: formData.paymentMethod,
       paymentStatus: 'Paid',
-      transactionId: formData.paymentTransactionId,
-      paymentDateTime: formData.paymentDateTime,
     };
 
     addStudentApp(studentData);
@@ -142,10 +117,7 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
       aadhaarCard: null,
       marksheet: null,
       transferCertificate: null,
-      applicationFee: 500,
       paymentMethod: '',
-      paymentTransactionId: '',
-      paymentDateTime: '',
     });
     setPaymentDone(false);
     setCurrentStep(1);
@@ -549,13 +521,13 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
                 </p>
                 <div className="bg-green-50 p-4 rounded-lg mb-4 text-left">
                   <p className="text-sm text-gray-600">
-                    <strong>Amount Paid:</strong> ₹{formData.applicationFee}
+                    <strong>Amount Paid:</strong> ₹500
                   </p>
                   <p className="text-sm text-gray-600">
-                    <strong>Transaction ID:</strong> {formData.paymentTransactionId}
+                    <strong>Transaction ID:</strong> TXN{new Date().getTime()}
                   </p>
                   <p className="text-sm text-gray-600">
-                    <strong>Date & Time:</strong> {formData.paymentDateTime}
+                    <strong>Date & Time:</strong> {new Date().toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -581,7 +553,7 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
                       <strong>Email:</strong> {formData.email}
                     </p>
                     <p className="text-gray-600">
-                      <strong>Payment Method:</strong> {formData.paymentMethod || 'N/A'}
+                      <strong>Student ID:</strong> STU{Math.floor(Math.random() * 1000)}
                     </p>
                   </div>
                   <div className="border-b pb-2">
@@ -595,9 +567,6 @@ export default function StudentAdmissionModal({ isOpen, onClose }) {
                   <div>
                     <p className="text-gray-600">
                       <strong>Accommodation:</strong> {formData.accommodation}
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Transaction ID:</strong> {formData.paymentTransactionId || 'N/A'}
                     </p>
                   </div>
                 </div>
