@@ -1,12 +1,14 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from urllib.parse import urlsplit
 
-load_dotenv()
+# Always load .env from the backend folder, independent of process CWD.
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
 MONGODB_URI = os.getenv("MONGODB_URI")
 
