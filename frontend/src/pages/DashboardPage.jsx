@@ -87,12 +87,25 @@ export default function DashboardPage() {
     navigate(`/students${roleQuery}`);
   }
 
-  const academicRoutes = {
+  const routeMap = {
+    Dashboard: '/dashboard',
+    Students: '/students',
+    Faculty: '/faculty',
+    Department: '/department',
     Exams: '/exams',
     Timetable: '/timetable',
     Attendance: '/attendance',
     Placement: '/placement',
     Facility: '/facility',
+    Fees: role === 'admin' ? '/admin-fees' : '/fees',
+    Reports: '/reports',
+    Admission: '/admission',
+    Payroll: '/payroll',
+    Invoices: role === 'admin' ? '/admin-invoices' : '/invoices',
+    Analytics: '/analytics',
+    Notifications: '/notifications',
+    Settings: '/settings',
+    'My Courses': '/my-courses',
   };
 
   useEffect(() => {
@@ -173,26 +186,19 @@ export default function DashboardPage() {
                     <li key={item}>
                       <a
                         href="#"
-                        className={
-                          (activePage === null && groupIndex === 0 && itemIndex === 0) ||
-                          (activePage !== null && academicRoutes[item] === activePage)
-                            ? 'active' : ''
-                        }
+                        className={(() => {
+                          const route = routeMap[item] || '/dashboard';
+                          const isActive =
+                            location.pathname === route ||
+                            (route !== '/dashboard' && location.pathname.startsWith(route));
+                          return isActive ? 'active' : '';
+                        })()}
                         onClick={(event) => {
                           event.preventDefault();
-                          if (item.toLowerCase() === 'settings') {
-                            setSidebarOpen(false);
-                            navigate(`/settings?role=${encodeURIComponent(role)}`);
-                          } else if (item.toLowerCase() === 'students') {
-                            setSidebarOpen(false);
-                            navigate(`/students?role=${encodeURIComponent(role)}`);
-                          } else if (academicRoutes[item]) {
-                            setActivePage(academicRoutes[item]);
-                            setSidebarOpen(false);
-                          } else {
-                            setActivePage(null);
-                            setSidebarOpen(false);
-                          }
+                          const route = routeMap[item] || '/dashboard';
+                          setActivePage(null);
+                          setSidebarOpen(false);
+                          navigate(`${route}?role=${encodeURIComponent(role)}`);
                         }}
                       >
                         {item}

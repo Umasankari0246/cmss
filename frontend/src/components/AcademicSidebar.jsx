@@ -2,6 +2,14 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { destroyUserSession, getUserSession } from '../auth/sessionController'
 import { cmsRoles, roleMenuGroups } from '../data/roleConfig'
 
+function GraduationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zm0 2.26L19.02 9 12 12.74 4.98 9 12 5.26zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
+    </svg>
+  )
+}
+
 const getRouteMap = (role) => ({
   Dashboard: '/dashboard',
   Students: '/students',
@@ -42,13 +50,13 @@ export default function AcademicSidebar({ isSidebarVisible = true, onToggleSideb
       className={`w-64 border-r border-slate-200 bg-white flex flex-col fixed h-full overflow-y-auto z-20 transition-transform duration-300 ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'}`}
       id="sidebar"
     >
-      <div className="p-5 flex items-start gap-2">
-        <div className="bg-[#2563eb] w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-100 shrink-0">
-          <span className="material-symbols-outlined text-xl font-bold">school</span>
+      <div className="sidebar-logo">
+        <div className="logo-mark">
+          <GraduationIcon />
         </div>
-        <div className="min-w-0 flex-1">
-          <h1 className="font-black text-[#1e293b] text-xl tracking-tight leading-tight">MIT Connect</h1>
-          <p className="text-[11px] font-semibold text-[#64748b] uppercase tracking-widest mt-0.5">{roleLabel} Portal</p>
+        <div className="logo-text-wrap">
+          <div className="logo-title">MIT Connect</div>
+          <div className="logo-sub">{roleLabel} Portal</div>
         </div>
         <button
           type="button"

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
@@ -1440,6 +1440,7 @@ function FacultyView({activeMonths,rangeLabel,department,semester}){
 // ══════════════════════════════════════════════════════════════════════════════
 export default function AnalyticsPage({role:propRole}){
   const navigate       = useNavigate();
+  const location       = useLocation();
   const [searchParams] = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -1450,6 +1451,26 @@ export default function AnalyticsPage({role:propRole}){
   const role       = getValidRole(propRole||searchParams.get('role')||storedRole);
   const data       = cmsRoles[role];
   const menuGroups = roleMenuGroups[role]||roleMenuGroups.student;
+  const routeMap = {
+    Dashboard: '/dashboard',
+    Students: '/students',
+    Faculty: '/faculty',
+    Department: '/department',
+    Exams: '/exams',
+    Timetable: '/timetable',
+    Attendance: '/attendance',
+    Placement: '/placement',
+    Facility: '/facility',
+    Fees: role === 'admin' ? '/admin-fees' : '/fees',
+    Reports: '/reports',
+    Admission: '/admission',
+    Payroll: '/payroll',
+    Invoices: role === 'admin' ? '/admin-invoices' : '/invoices',
+    Analytics: '/analytics',
+    Notifications: '/notifications',
+    Settings: '/settings',
+    'My Courses': '/my-courses',
+  };
 
   const [startMY,    setStartMY]    = useState({month:0,year:2026});
   const [endMY,      setEndMY]      = useState({month:2,year:2026});
@@ -1567,7 +1588,30 @@ export default function AnalyticsPage({role:propRole}){
             {menuGroups.map((group)=>(
               <div key={group.title}>
                 <div className="nav-section-label">{group.title}</div>
-                <ul>{group.items.map(item=><li key={item}><a href="#" className={item==='Analytics'?'active':''} onClick={e=>e.preventDefault()}>{item}</a></li>)}</ul>
+                <ul>
+                  {group.items.map((item) => {
+                    const route = routeMap[item] || '/dashboard';
+                    const isActive =
+                      location.pathname === route ||
+                      (route !== '/dashboard' && location.pathname.startsWith(route));
+
+                    return (
+                      <li key={item}>
+                        <a
+                          href="#"
+                          className={isActive ? 'active' : ''}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setSidebarOpen(false);
+                            navigate(`${route}?role=${encodeURIComponent(role)}`);
+                          }}
+                        >
+                          {item}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             ))}
           </nav>

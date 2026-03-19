@@ -45,7 +45,7 @@ export default function App() {
         <Route path="/timetable" element={<ProtectedRoute><TimetablePage /></ProtectedRoute>} />
         <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
         <Route path="/exams" element={<ProtectedRoute><ExamsPage /></ProtectedRoute>} />
-        <Route path="/placement" element={<ProtectedRoute allowedRoles={['admin', 'faculty']}><PlacementPage /></ProtectedRoute>} />
+        <Route path="/placement" element={<ProtectedRoute allowedRoles={['admin', 'faculty', 'student']}><PlacementPage /></ProtectedRoute>} />
         <Route path="/facility" element={<ProtectedRoute allowedRoles={['admin']}><FacilityPage /></ProtectedRoute>} />
         <Route path="/payroll" element={<ProtectedRoute><PayrollPage /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
