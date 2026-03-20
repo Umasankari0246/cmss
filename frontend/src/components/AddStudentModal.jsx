@@ -1,8 +1,9 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
+export default function AddStudentModal({ isOpen, onClose, onSuccess, editStudent }) {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const initialData = {
     // Personal
     name: '',
@@ -43,19 +44,47 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const fileInputRef = useRef(null);
 
-  // Load draft from localStorage on mount
+  // Load draft from localStorage on mount or populate from editStudent
   useEffect(() => {
-    const draft = localStorage.getItem('add_student_draft');
-    if (draft) {
-      try {
-        const parsed = JSON.parse(draft);
-        setFormData(parsed);
-        if (parsed.avatar) setAvatarPreview(parsed.avatar);
-      } catch (e) {
-        console.error("Failed to load draft");
+    if (!isOpen) return;
+
+    if (editStudent) {
+      // Reformat dates for input fields
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+          return new Date(dateStr).toISOString().split('T')[0];
+        } catch (e) {
+          return '';
+        }
+      };
+
+      setFormData({
+        ...initialData,
+        ...editStudent,
+        dob: formatDate(editStudent.dob),
+        enrollDate: formatDate(editStudent.enrollDate),
+        docs: editStudent.docs || initialData.docs
+      });
+      if (editStudent.avatar) setAvatarPreview(editStudent.avatar);
+      setStep(1);
+    } else {
+      const draft = localStorage.getItem('add_student_draft');
+      if (draft) {
+        try {
+          const parsed = JSON.parse(draft);
+          setFormData(parsed);
+          if (parsed.avatar) setAvatarPreview(parsed.avatar);
+        } catch (e) {
+          console.error("Failed to load draft");
+        }
+      } else {
+        setFormData(initialData);
+        setAvatarPreview(null);
       }
+      setStep(1);
     }
-  }, [isOpen]);
+  }, [isOpen, editStudent]);
 
   if (!isOpen) return null;
 
@@ -123,17 +152,61 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
     alert('Progress saved to draft!');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep(step)) {
-      console.log('Final Enrollment:', formData);
-      if (onSuccess) onSuccess(formData);
-      localStorage.removeItem('add_student_draft');
-      alert('Student Enrollment Submitted Successfuly!');
-      onClose();
-      setStep(1);
-      setFormData(initialData);
-      setAvatarPreview(null);
+      setIsSubmitting(true);
+      try {
+        // Prepare data for backend
+        const studentId = editStudent ? (editStudent.rollNumber || editStudent.id) : formData.id;
+        const url = editStudent 
+          ? `http://localhost:5000/api/students/${encodeURIComponent(studentId)}`
+          : 'http://localhost:5000/api/students';
+        
+        const method = editStudent ? 'PUT' : 'POST';
+
+        // Format data to match backend schema
+        const payload = {
+          ...formData,
+          semester: parseInt(formData.semester) || 1,
+          enrollDate: formData.enrollDate ? new Date(formData.enrollDate).toISOString() : null,
+          dob: formData.dob ? new Date(formData.dob).toISOString() : null,
+          // Convert docs to simple documents list for now if the backend expects list of dicts
+          documents: [
+            { id: 'DOC-01', name: '10th Marksheet', type: 'base64', data: formData.docs.marksheet10 },
+            { id: 'DOC-02', name: '12th Marksheet', type: 'base64', data: formData.docs.marksheet12 },
+            { id: 'DOC-03', name: 'Aadhar Card', type: 'base64', data: formData.docs.aadhar },
+            { id: 'DOC-04', name: 'Passport Photo', type: 'base64', data: formData.docs.photo },
+          ].filter(d => d.data)
+        };
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || 'Failed to save student');
+        }
+
+        const savedStudent = await res.json();
+        console.log('Success:', savedStudent);
+        
+        if (onSuccess) onSuccess(savedStudent);
+        localStorage.removeItem('add_student_draft');
+        alert(editStudent ? 'Student details updated successfully!' : 'Student enrolled successfully!');
+        onClose();
+        setStep(1);
+        setFormData(initialData);
+        setAvatarPreview(null);
+      } catch (err) {
+        console.error('Submit error:', err);
+        alert(`Error: ${err.message}`);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -156,7 +229,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[750px] max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
         
         {/* Progress Bar */}
         <div className="bg-slate-50 flex items-center border-b border-slate-200">
@@ -172,9 +245,9 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
           <div>
             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
               <div className="p-2 bg-[#1162d4]/10 rounded-lg">
-                <span className="material-symbols-outlined text-[#1162d4]">person_add</span>
+                <span className="material-symbols-outlined text-[#1162d4]">{editStudent ? 'edit_note' : 'person_add'}</span>
               </div>
-              Enroll New Student
+              {editStudent ? 'Edit Student Details' : 'Enroll New Student'}
             </h2>
             <p className="text-sm text-slate-500 mt-1">Step {step} of 5: {steps[step-1].label} Information</p>
           </div>
@@ -526,10 +599,11 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
               ) : (
                 <button 
                    onClick={handleSubmit}
-                   className="px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
+                   disabled={isSubmitting}
+                   className={`px-6 py-2.5 ${isSubmitting ? 'bg-slate-400' : 'bg-emerald-600 hover:bg-emerald-700'} text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2`}
                 >
-                  Complete Enrollment
-                  <span className="material-symbols-outlined text-base">verified_user</span>
+                  {isSubmitting ? 'Processing...' : editStudent ? 'Save Changes' : 'Complete Enrollment'}
+                  <span className="material-symbols-outlined text-base">{isSubmitting ? 'sync' : 'verified_user'}</span>
                 </button>
               )}
             </div>
