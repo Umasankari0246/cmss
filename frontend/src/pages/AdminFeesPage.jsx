@@ -157,71 +157,103 @@ export default function AdminFeesPage() {
   return (
     <Layout title="Fee Management">
       <div className="space-y-8">
-        {/* Main Table */}
-        <div className="bg-white rounded-lg shadow p-6">
+        {/* All Fee Assignments Cards */}
+        <div>
           <div className="mb-6">
             <h2 className="text-lg font-bold text-gray-800">All Fee Assignments</h2>
           </div>
 
           {feeAssignments.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
               <span className="material-symbols-outlined text-4xl block mb-4 text-gray-300">receipt_long</span>
               <p className="font-medium">No fee assignments yet</p>
               <p className="text-sm">Start by assigning fees to approved students</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Student Name</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Application ID</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Semester</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Course</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Total Fee</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Payment Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {feeAssignments.map((assignment) => (
-                    <tr key={assignment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-gray-700">{assignment.studentName}</td>
-                      <td className="py-3 px-4 text-gray-700">{assignment.applicationId}</td>
-                      <td className="py-3 px-4 text-gray-700">{assignment.semester}</td>
-                      <td className="py-3 px-4 text-gray-700">{assignment.course}</td>
-                      <td className="py-3 px-4 font-semibold text-gray-900">₹{assignment.totalFee.toLocaleString()}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          assignment.paymentStatus === 'Paid'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          {assignment.paymentStatus}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleGenerateInvoice(assignment)}
-                            className="p-2 hover:bg-yellow-100 text-yellow-600 rounded transition"
-                            title="Generate Invoice"
-                          >
-                            <span className="material-symbols-outlined text-lg">receipt</span>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(assignment)}
-                            className="p-2 hover:bg-red-100 text-red-600 rounded transition"
-                            title="Delete"
-                          >
-                            <span className="material-symbols-outlined text-lg">delete</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {feeAssignments.map((assignment) => (
+                <div
+                  key={assignment.id}
+                  className="bg-green-50 border-2 border-green-100 rounded-lg p-4 shadow hover:shadow-md transition"
+                >
+                  {/* Badge */}
+                  <div className="mb-2">
+                    <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      Fee Assigned
+                    </span>
+                  </div>
+
+                  {/* Student Name */}
+                  <h3 className="text-base font-bold text-gray-900 mb-2">
+                    {assignment.studentName}
+                  </h3>
+
+                  {/* Application ID and Basic Info */}
+                  <div className="text-xs text-gray-600 mb-2 space-y-1">
+                    <p><span className="font-semibold">Application ID:</span> {assignment.applicationId}</p>
+                    <p><span className="font-semibold">Semester:</span> {assignment.semester}</p>
+                    <p><span className="font-semibold">Course:</span> {assignment.course}</p>
+                  </div>
+
+                  {/* Total Fee (Prominent) */}
+                  <div className="bg-white rounded-lg p-2 mb-2 border border-green-200">
+                    <p className="text-2xl font-bold text-orange-600 mb-1">
+                      ₹{assignment.totalFee.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-600">Total Fee</p>
+                  </div>
+
+                  {/* Assigned Date and Status */}
+                  <div className="text-xs text-gray-600 mb-2 space-y-1">
+                    <p><span className="font-semibold">Assigned Date:</span> {assignment.assignedDate}</p>
+                    <p>
+                      <span className="font-semibold">Payment Status:</span>
+                      <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        assignment.paymentStatus === 'Paid'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {assignment.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Fee Breakdown */}
+                  <div className="bg-white rounded-lg p-2 mb-3">
+                    <p className="text-xs font-bold text-gray-800 mb-1">Fee Breakdown:</p>
+                    <ul className="text-xs text-gray-700 space-y-0.5">
+                      <li>• Semester Fee: <span className="float-right font-semibold">₹{assignment.semesterFee.toLocaleString()}</span></li>
+                      <li>• Book Fee: <span className="float-right font-semibold">₹{assignment.bookFee.toLocaleString()}</span></li>
+                      <li>• Exam Fee: <span className="float-right font-semibold">₹{assignment.examFee.toLocaleString()}</span></li>
+                      {assignment.hostelFee > 0 && (
+                        <li>• Hostel Fee: <span className="float-right font-semibold">₹{assignment.hostelFee.toLocaleString()}</span></li>
+                      )}
+                      {assignment.miscFee > 0 && (
+                        <li>• Misc Fee: <span className="float-right font-semibold">₹{assignment.miscFee.toLocaleString()}</span></li>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleGenerateInvoice(assignment)}
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-1.5 text-sm rounded-lg transition flex items-center justify-center gap-1"
+                      title="Generate Invoice"
+                    >
+                      <span className="material-symbols-outlined text-sm">receipt</span>
+                      Generate Invoice
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(assignment)}
+                      className="p-1.5 hover:bg-red-100 text-red-600 rounded transition border border-red-200"
+                      title="Delete"
+                    >
+                      <span className="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

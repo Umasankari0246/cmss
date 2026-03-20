@@ -51,9 +51,30 @@ export default function FacultyAdmissionModal({ isOpen, onClose }) {
 
   const handlePaymentDetailsChange = (e) => {
     const { name, value } = e.target;
+    let formattedValue = value;
+
+    if (name === 'cardNumber') {
+      // Remove all non-digits and limit to 16 digits
+      formattedValue = value.replace(/\D/g, '').slice(0, 16);
+      // Format as 4 groups of 4 digits
+      if (formattedValue.length > 0) {
+        formattedValue = formattedValue.match(/.{1,4}/g).join(' ');
+      }
+    } else if (name === 'expiryDate') {
+      // Remove all non-digits and limit to 4 digits
+      formattedValue = value.replace(/\D/g, '').slice(0, 4);
+      // Format as MM/YY
+      if (formattedValue.length >= 2) {
+        formattedValue = formattedValue.slice(0, 2) + '/' + formattedValue.slice(2, 4);
+      }
+    } else if (name === 'cvv') {
+      // Remove all non-digits and limit to 3 digits
+      formattedValue = value.replace(/\D/g, '').slice(0, 3);
+    }
+
     setPaymentDetails((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: formattedValue,
     }));
   };
 
@@ -467,20 +488,7 @@ export default function FacultyAdmissionModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                  <select
-                    name="paymentMethod"
-                    value={formData.paymentMethod}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select payment method</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="UPI">UPI</option>
-                  </select>
-                </div>
+
               </div>
             )}
 
