@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 # Always load .env from the backend folder, independent of process CWD.
 load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
-# Use Atlas connection string
+# Use Atlas connection string with credentials
 MONGODB_URI = os.getenv("MONGODB_URI") or "mongodb+srv://priyadharshini:Ezhilithanya@cluster0.crvutrr.mongodb.net/College_db"
 
 client: AsyncIOMotorClient | None = None

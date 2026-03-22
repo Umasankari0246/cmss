@@ -1,6 +1,6 @@
 // Real MongoDB analytics service - fetches from backend API
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
 // Fetch real analytics data from MongoDB with optional filters
 export async function getRealAnalyticsData(year = null, semester = null, department = null) {
@@ -14,6 +14,8 @@ export async function getRealAnalyticsData(year = null, semester = null, departm
     const queryString = params.toString();
     const url = `${API_BASE_URL}/analytics/dashboard${queryString ? '?' + queryString : ''}`;
     
+    console.log('Fetching analytics from:', url);
+    
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -22,7 +24,11 @@ export async function getRealAnalyticsData(year = null, semester = null, departm
     
     const result = await response.json();
     
+    console.log('Analytics response:', result);
+    
     if (result.success && result.data) {
+      console.log('Analytics data keys:', Object.keys(result.data));
+      console.log('Student analytics present:', !!result.data.studentAnalytics);
       return result.data;
     }
     
