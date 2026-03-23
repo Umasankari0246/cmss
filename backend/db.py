@@ -11,8 +11,8 @@ from urllib.parse import urlsplit
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-DEFAULT_MONGODB_URI = "mongodb://localhost:27017/College_db"
-MONGODB_URI = os.getenv("MONGODB_URI", DEFAULT_MONGODB_URI)
+# Use Atlas connection string with credentials
+MONGODB_URI = os.getenv("MONGODB_URI") or "mongodb+srv://priyadharshini:Ezhilithanya@cluster0.crvutrr.mongodb.net/College_db"
 
 client: AsyncIOMotorClient | None = None
 db = None
