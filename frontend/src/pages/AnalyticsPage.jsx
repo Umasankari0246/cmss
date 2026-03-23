@@ -105,11 +105,11 @@ const adminCardsByMonth = {
   Nov:{students:'2,700',faculty:'400',depts:'5',courses:'47'},Dec:{students:'2,650',faculty:'394',depts:'5',courses:'44'},
 };
 
-const studentsByDept  = {CS:680,Phys:420,Math:390,ECE:580,Mech:510};
-const studentsByYear  = {'Year 1':720,'Year 2':680,'Year 3':620,'Year 4':560};
-const genderData      = [{name:'Male',value:58},{name:'Female',value:40},{name:'Other',value:2}];
-const cgpaByDept      = {CS:8.4,Phys:7.9,Math:8.1,ECE:8.2,Mech:7.8};
-const facultyByDept   = {CS:82,Phys:68,Math:58,ECE:94,Mech:86};
+const studentsByDept  = {}; // Will be populated with real data from MongoDB
+const studentsByYear  = {}; // Will be populated with real data from MongoDB  
+const genderData      = []; // Will be populated with real data from MongoDB
+const cgpaByDept      = {}; // Will be populated with real data from MongoDB
+const facultyByDept   = {}; // Will be populated with real data from MongoDB
 const facultyRankData = [
   {rank:'Professor',count:68},{rank:'Assoc. Prof',count:112},{rank:'Asst. Prof',count:158},{rank:'Lecturer',count:50},
 ];
@@ -691,21 +691,27 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
 
   // Use real analytics data if available, otherwise fall back to mock data
   const useRealData = analyticsData && 
-                       (analyticsData.studentAnalytics || analyticsData.summaryData || analyticsData.studentsByDept);
+                       ((analyticsData.success === true && analyticsData.data) ||
+                        (analyticsData.data?.studentAnalytics || analyticsData.data?.summaryData || analyticsData.data?.studentsByDept || analyticsData.studentAnalytics || analyticsData.summaryData || analyticsData.studentsByDept));
   console.log('useRealData:', useRealData);
+  console.log('analyticsData.success:', analyticsData?.success);
+  console.log('analyticsData keys:', analyticsData ? Object.keys(analyticsData) : 'null');
+  console.log('analyticsData.data keys:', analyticsData?.data ? Object.keys(analyticsData.data) : 'null');
+  console.log('analyticsData.data.studentAnalytics exists:', !!analyticsData?.data?.studentAnalytics);
+  console.log('analyticsData.data.summaryData exists:', !!analyticsData?.data?.summaryData);
   
   // Real data processing
   const realData = useRealData ? {
-    studentsByDept: analyticsData.studentsByDept || {},
-    attendanceData: analyticsData.attendanceData || [],
-    departmentAttendance: analyticsData.departmentAttendance || [],
-    performanceData: analyticsData.performanceData || [],
-    summaryData: analyticsData.summaryData || {},
-    departmentData: analyticsData.departmentData || [],
-    facultyData: analyticsData.facultyData || {},
-    studentAnalytics: analyticsData.studentAnalytics || {},
-    realDeptAttendance: analyticsData.studentAnalytics?.attendance?.byDepartment || {},
-    passFailData: analyticsData.passFailData || []  // Use backend pass/fail data
+    studentsByDept: (analyticsData.data?.studentAnalytics?.demographics?.byDepartment || analyticsData.studentsByDept || {}),
+    attendanceData: (analyticsData.data?.attendanceData || analyticsData.attendanceData || []),
+    departmentAttendance: (analyticsData.data?.departmentAttendance || analyticsData.departmentAttendance || []),
+    performanceData: (analyticsData.data?.performanceData || analyticsData.performanceData || []),
+    summaryData: (analyticsData.data?.summaryData || analyticsData.summaryData || {}),
+    departmentData: (analyticsData.data?.departmentData || analyticsData.departmentData || []),
+    facultyData: (analyticsData.data?.facultyData || analyticsData.facultyData || {}),
+    studentAnalytics: (analyticsData.data?.studentAnalytics || analyticsData.studentAnalytics || {}),
+    realDeptAttendance: (analyticsData.data?.studentAnalytics?.attendance?.byDepartment || analyticsData.studentAnalytics?.attendance?.byDepartment || {}),
+    passFailData: (analyticsData.data?.passFailData || analyticsData.passFailData || [])  // Use backend pass/fail data
   } : null;
 
   const aAttData  = useMemo(()=>{
@@ -786,7 +792,7 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
     return DEPTS.map(d=>{
       const att=Math.round(activeMonths.reduce((s,m)=>{const f=(adminAttByMonth[m]??[]).find(x=>x.dept===d);return s+(f?.avg??0)},0)/activeMonths.length);
       const pass=Math.round(activeMonths.reduce((s,m)=>{const f=(adminExamByMonth[m]??[]).find(x=>x.dept===d);return s+(f?.pass??0)},0)/activeMonths.length);
-      const cgpa=cgpaByDept[d]??0;
+      const cgpa=realData?.departmentData?.find(dept => dept.name === d)?.cgpa || cgpaByDept[d] || 0;
       const score=Math.round(att*0.3+pass*0.5+cgpa*2.2);
       return{dept:d,att,pass,cgpa,score,students:studentsByDept[d]??0,faculty:facultyByDept[d]??0};
     }).sort((a,b)=>b.score-a.score);
@@ -800,9 +806,18 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
       return Object.entries(realData.studentsByDept).map(([name, value]) => ({name, value}));
     } else if (useRealData && realData.studentAnalytics?.demographics?.byDepartment) {
       return Object.entries(realData.studentAnalytics.demographics.byDepartment).map(([name, value]) => ({name, value}));
+    } else if (useRealData && analyticsData?.data?.studentAnalytics?.demographics?.byDepartment) {
+      return Object.entries(analyticsData.data.studentAnalytics.demographics.byDepartment).map(([name, value]) => ({name, value}));
     }
     return Object.entries(dc?{[dc]:studentsByDept[dc]}:studentsByDept).map(([k,v])=>({name:DEPT_FULL[k]??k,value:v}));
-  }, [useRealData, realData, dc]);
+  }, [useRealData, realData, dc, analyticsData]);
+
+  const yearPieData = useMemo(() => {
+    if (useRealData && realData.studentAnalytics?.enrollment?.byYear) {
+      return Object.entries(realData.studentAnalytics.enrollment.byYear).map(([name, value]) => ({name, value}));
+    }
+    return Object.entries(studentsByYear).map(([k,v])=>({name:k,value:v}));
+  }, [useRealData, realData]);
   
   // Debug logging for charts
   console.log('=== Chart Data Debug ===');
@@ -810,12 +825,24 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
   console.log('yearPieData:', yearPieData);
   console.log('studentsByDept from realData:', realData?.studentsByDept);
   console.log('enrollment byYear from studentAnalytics:', realData?.studentAnalytics?.enrollment?.byYear);
-  const facultyPieData=useRealData && realData.facultyData?.facultyByDept ?
-    Object.entries(realData.facultyData.facultyByDept).map(([k,v])=>({name:k,value:v})) :
-    Object.entries(dc?{[dc]:facultyByDept[dc]}:facultyByDept).map(([k,v])=>({name:k,value:v}));
+  console.log('facultyData from realData:', realData?.facultyData);
+  console.log('facultyData.facultyByDept:', realData?.facultyData?.facultyByDept);
+  console.log('analyticsData.data.facultyData:', analyticsData?.data?.facultyData);
+  console.log('useRealData:', useRealData);
+  console.log('analyticsData structure:', analyticsData);
+  console.log('realData structure:', realData);
+  
+  const facultyPieData = useMemo(() => {
+    if (useRealData && realData.facultyData?.facultyByDept && Object.keys(realData.facultyData.facultyByDept).length > 0) {
+      return Object.entries(realData.facultyData.facultyByDept).map(([k,v])=>({name:k,value:v}));
+    } else if (useRealData && analyticsData?.data?.facultyData?.facultyByDept) {
+      return Object.entries(analyticsData.data.facultyData.facultyByDept).map(([k,v])=>({name:k,value:v}));
+    }
+    return Object.entries(dc?{[dc]:facultyByDept[dc]}:facultyByDept).map(([k,v])=>({name:k,value:v}));
+  }, [useRealData, realData, dc, analyticsData]);
   const cgpaDeptData = useRealData && realData.departmentData ? 
     realData.departmentData.map(d => ({dept: d.name, cgpa: d.cgpa || 7.5})) :
-    (dc?[{dept:dc,cgpa:cgpaByDept[dc]}]:DEPTS.map(d=>({dept:d,cgpa:cgpaByDept[d]}))).filter(Boolean);
+    (dc?[{dept:dc,cgpa:7.5}]:DEPTS.map(d=>({dept:d,cgpa:7.5}))).filter(Boolean);
 
   const genderData = useMemo(() => {
   if (useRealData && realData.studentAnalytics?.demographics?.byGender) {
@@ -850,14 +877,7 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
             <SCard label="Placement Rate"   value={aCards.placementRate} sub="Students placed" tone="orange"  icon="💼" trend="up"/>
           </div>
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:20,marginBottom:20}}>
-            <CC title="👥 Students by Department" subtitle="Distribution across depts">
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart><Pie data={deptPieData} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={<PieLabelInside labelType="count"/>} labelLine={false}>
-                  {deptPieData.map((_,i)=><Cell key={i} fill={Object.values(DEPT_COLORS)[i%5]}/>)}
-                </Pie><Tooltip {...TT}/></PieChart>
-              </ResponsiveContainer>
-            </CC>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
             <CC title="📊 Students by Year" subtitle="Year-wise enrollment">
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart><Pie data={yearPieData} cx="50%" cy="50%" innerRadius={45} outerRadius={75} dataKey="value">
@@ -883,25 +903,9 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
                 </BarChart>
               </ResponsiveContainer>
             </CC>
-            <CC title="📝 Exam Pass vs Fail" subtitle={`Pass/fail breakdown — ${rangeLabel}`}>
-              <ResponsiveContainer width="100%" height={H}>
-                <BarChart data={filteredExam} margin={{top:4,right:4,left:-20,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6"/><XAxis dataKey="dept" tick={{fontSize:11,fill:'#9ca3af'}} axisLine={false} tickLine={false}/><YAxis domain={[0,100]} tick={{fontSize:10,fill:'#9ca3af'}} axisLine={false} tickLine={false} tickFormatter={v=>`${v}%`}/><Tooltip {...TT} formatter={v=>`${v}%`}/><Legend wrapperStyle={{fontSize:12}}/>
-                  <Bar dataKey="pass" name="Pass%" stackId="a" fill={C.green} radius={[0,0,0,0]}/><Bar dataKey="fail" name="Fail%" stackId="a" fill={C.red} radius={[6,6,0,0]}/>
-                </BarChart>
-              </ResponsiveContainer>
-            </CC>
           </div>
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-            <CC title="🎓 Average CGPA by Department" subtitle={dc?`${dc}`:'All departments'}>
-              <ResponsiveContainer width="100%" height={H}>
-                <BarChart data={cgpaDeptData} margin={{top:4,right:4,left:-20,bottom:0}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6"/><XAxis dataKey="dept" tick={{fontSize:11,fill:'#9ca3af'}} axisLine={false} tickLine={false}/><YAxis domain={[7,10]} tick={{fontSize:10,fill:'#9ca3af'}} axisLine={false} tickLine={false}/><Tooltip {...TT} formatter={v=>v.toFixed(1)}/>
-                  <Bar dataKey="cgpa" name="Avg CGPA" radius={[6,6,0,0]}>{cgpaDeptData.map((_,i)=><Cell key={i} fill={Object.values(DEPT_COLORS)[i%5]}/>)}</Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CC>
+          <div style={{display:'grid',gridTemplateColumns:'1fr',gap:20,marginBottom:20}}>
             <CC title="🏆 Department Rankings" subtitle={`Score = att 30% + pass 50% + CGPA 20%`}>
               <table style={{width:'100%',borderCollapse:'collapse'}}>
                 <thead><tr><th style={tH}>#</th><th style={tH}>Dept</th><th style={tH}>Att</th><th style={tH}>Pass</th><th style={tH}>CGPA</th><th style={tH}>Score</th></tr></thead>
@@ -965,35 +969,7 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
             </CC>
           </div>
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-            <CC title="🗓️ Attendance Heatmap" subtitle="Dept × Month — color = avg attendance" style={{marginBottom:20}}>
-              <div style={{overflowX:'auto'}}>
-                <table style={{borderCollapse:'separate',borderSpacing:4,width:'100%'}}>
-                  <thead><tr><th style={{...tH,width:50}}>Dept</th>{MONTHS_ALL.map(m=><th key={m} style={{...tH,textAlign:'center',minWidth:44,padding:'4px 2px'}}>{m}</th>)}<th style={{...tH,textAlign:'center'}}>Avg</th></tr></thead>
-                  <tbody>{(dc?[dc]:DEPTS).map(d=>{
-                    const vals=MONTHS_ALL.map(m=>(adminAttByMonth[m]??[]).find(x=>x.dept===d)?.avg??0);
-                    const rowAvg=Math.round(vals.reduce((a,b)=>a+b,0)/12);
-                    return<tr key={d}><td style={{fontSize:12,fontWeight:700,padding:'2px 8px'}}><span style={{display:'inline-block',width:8,height:8,borderRadius:2,background:DEPT_COLORS[d],marginRight:5}}/>{d}</td>
-                      {vals.map((v,mi)=>{
-                        const inSel=activeMonths.includes(MONTHS_ALL[mi]);
-                        const bg=v<78?`rgba(239,68,68,${0.15+((v-60)/30)*0.5})`:v<84?`rgba(249,115,22,${0.15+((v-70)/25)*0.5})`:`rgba(37,99,235,${0.12+((v-75)/20)*0.5})`;
-                        return<td key={mi} title={`${d} ${MONTHS_ALL[mi]}: ${v}%`} style={{background:bg,borderRadius:6,border:inSel?'2px solid #f97316':'2px solid transparent',textAlign:'center',fontSize:11,fontWeight:700,color:v<78?'#b91c1c':v<84?'#c2410c':'#1e40af',padding:'5px 2px',minWidth:44,cursor:'default'}}>{v}%</td>;
-                      })}
-                      <td style={{textAlign:'center',fontSize:12,fontWeight:800,color:rowAvg<80?C.red:rowAvg<85?C.orange:C.blue,padding:'5px 6px'}}>{rowAvg}%</td>
-                    </tr>;
-                  })}</tbody>
-                </table>
-              </div>
-              <div style={{display:'flex',gap:14,marginTop:8,fontSize:11,color:'#6b7280',flexWrap:'wrap'}}>
-                {[['rgba(239,68,68,0.5)','<78% Low'],['rgba(249,115,22,0.5)','78-84% Watch'],['rgba(37,99,235,0.5)','85%+ Good']].map(([bg,lbl])=>(
-                  <span key={lbl} style={{display:'flex',alignItems:'center',gap:4}}><span style={{display:'inline-block',width:12,height:12,borderRadius:2,background:bg}}/>{lbl}</span>
-                ))}
-                <span style={{color:'#f97316',fontWeight:600,marginLeft:4}}>🟠 bordered = selected range</span>
-              </div>
-            </CC>
-
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-              <CC title="📈 Attendance Trend — All Depts" subtitle="12 months, per department">
+          <CC title="📈 Attendance Trend — All Depts" subtitle="12 months, per department">
                 <ResponsiveContainer width="100%" height={H2}>
                   <LineChart data={attTrendData} margin={{top:4,right:4,left:-20,bottom:0}}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6"/><XAxis dataKey="month" tick={{fontSize:9,fill:'#9ca3af'}} axisLine={false} tickLine={false}/><YAxis domain={[65,100]} tick={{fontSize:9,fill:'#9ca3af'}} axisLine={false} tickLine={false} tickFormatter={v=>`${v}%`}/><Tooltip {...TT} formatter={v=>`${v}%`}/><Legend wrapperStyle={{fontSize:10}}/>
@@ -1001,16 +977,6 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
                   </LineChart>
                 </ResponsiveContainer>
               </CC>
-              <CC title="📊 Pass Rate Trend — All Depts" subtitle="12 months, per department">
-                <ResponsiveContainer width="100%" height={H2}>
-                  <LineChart data={passTrendData} margin={{top:4,right:4,left:-20,bottom:0}}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6"/><XAxis dataKey="month" tick={{fontSize:9,fill:'#9ca3af'}} axisLine={false} tickLine={false}/><YAxis domain={[60,100]} tick={{fontSize:9,fill:'#9ca3af'}} axisLine={false} tickLine={false} tickFormatter={v=>`${v}%`}/><Tooltip {...TT} formatter={v=>`${v}%`}/><Legend wrapperStyle={{fontSize:10}}/>
-                    {(dc?[dc]:DEPTS).map(d=><Line key={d} type="monotone" dataKey={d} stroke={DEPT_COLORS[d]} strokeWidth={1.8} dot={false}/>)}
-                  </LineChart>
-                </ResponsiveContainer>
-              </CC>
-            </div>
-          </div>
         </>
       )}
 
@@ -1092,13 +1058,13 @@ function AdminView({activeMonths,rangeLabel,department,semester,analyticsData}){
                 <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10,padding:'10px 14px',background:DEPT_COLORS[deptKey]+'15',borderRadius:10,border:`1.5px solid ${DEPT_COLORS[deptKey]}40`}}>
                   <span style={{display:'inline-block',width:12,height:12,borderRadius:3,background:DEPT_COLORS[deptKey]}}/>
                   <span style={{fontWeight:800,fontSize:14,color:DEPT_COLORS[deptKey]}}>{deptKey}</span>
-                  <span style={{fontSize:12,color:'#6b7280',marginLeft:4}}>— {FACULTY_LIST[deptKey]?.length??0} faculty members</span>
+                  <span style={{fontSize:12,color:'#6b7280',marginLeft:4}}>— {useRealData && realData.facultyData?.detailedFaculty?.[deptKey] ? realData.facultyData.detailedFaculty[deptKey].length : (FACULTY_LIST[deptKey]?.length??0)} faculty members</span>
                   <span style={{marginLeft:'auto',fontSize:12,fontWeight:700,color:'#374151'}}>Avg Att: <span style={{color:C.green}}>{rankingData.find(r=>r.dept===deptKey)?.att??0}%</span></span>
                   <span style={{fontSize:12,fontWeight:700,color:'#374151'}}>Pass: <span style={{color:C.blue}}>{rankingData.find(r=>r.dept===deptKey)?.pass??0}%</span></span>
                 </div>
                 <table style={{width:'100%',borderCollapse:'collapse'}}>
                   <thead><tr><th style={tH}>Name</th><th style={tH}>Designation</th><th style={tH}>Subject</th><th style={tH}>Attendance</th><th style={tH}>Pass Rate</th><th style={tH}>Experience</th><th style={tH}>Status</th></tr></thead>
-                  <tbody>{(FACULTY_LIST[deptKey]??[]).map((f,i)=>{
+                  <tbody>{(useRealData && realData.facultyData?.detailedFaculty?.[deptKey] ? realData.facultyData.detailedFaculty[deptKey] : (FACULTY_LIST[deptKey]??[])).map((f,i)=>{
                     const attNum=parseInt(f.att);
                     const passNum=parseInt(f.passRate);
                     return(
