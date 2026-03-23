@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { roleSettingsApi } from '../../api/roleSettingsApi';
 import { getUserSession } from '../../auth/sessionController';
-import RoleSettingsShell from '../../components/role-settings/RoleSettingsShell';
+import Layout from '../../components/Layout';
 import {
   Button,
   FormInput,
@@ -391,14 +391,9 @@ export default function AdminSettings() {
   }
 
   return (
-    <RoleSettingsShell
-      role="admin"
-      portalTitle="EduCore Admin Portal"
-      userName={profileData.fullName || 'Admin User'}
-      modePill="ADMIN MODE"
-    >
+    <Layout title="Settings">
       {loading ? (
-        <div className="settings-load-state">Loading settings...</div>
+        <div className="settings-load-error">Loading settings...</div>
       ) : (
         <>
           <div className="settings-page-head">
@@ -700,6 +695,6 @@ export default function AdminSettings() {
           </SectionContainer>
         </>
       )}
-    </RoleSettingsShell>
+    </Layout>
   );
 }

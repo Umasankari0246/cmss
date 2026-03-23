@@ -1,10 +1,16 @@
 import { getUserSession } from '../auth/sessionController'
 import { cmsRoles } from '../data/roleConfig'
+import { useNavigate } from 'react-router-dom'
 
 export default function TopBar({ title, isSidebarVisible = true }) {
   const session = getUserSession()
   const role = session?.role || 'student'
   const user = cmsRoles[role] || cmsRoles.student
+  const navigate = useNavigate()
+
+  function handleSettingsClick() {
+    navigate(`/${role}/settings?role=${encodeURIComponent(role)}`)
+  }
 
   return (
     <header className={`h-20 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md bg-white/80 transition-all duration-300 ${isSidebarVisible ? 'px-10' : 'pl-24 pr-10'}`}>
@@ -20,7 +26,10 @@ export default function TopBar({ title, isSidebarVisible = true }) {
             <span className="material-symbols-outlined text-[24px]">notifications</span>
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
-          <button className="p-2.5 text-slate-400 hover:bg-slate-50 rounded-xl transition-all">
+          <button 
+            onClick={handleSettingsClick}
+            className="p-2.5 text-slate-400 hover:bg-slate-50 rounded-xl transition-all"
+          >
             <span className="material-symbols-outlined text-[24px]">settings</span>
           </button>
         </div>

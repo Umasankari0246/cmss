@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { roleSettingsApi } from '../../api/roleSettingsApi';
 import { getUserSession } from '../../auth/sessionController';
-import RoleSettingsShell from '../../components/role-settings/RoleSettingsShell';
+import Layout from '../../components/Layout';
 import {
   Button,
   Card,
@@ -326,13 +326,9 @@ export default function FacultySettings() {
   }
 
   return (
-    <RoleSettingsShell
-      role="faculty"
-      portalTitle="EduCore Faculty Portal"
-      userName={profileData.fullName || 'Faculty User'}
-    >
+    <Layout title="Settings">
       {loading ? (
-        <div className="settings-load-state">Loading settings...</div>
+        <div className="settings-load-error">Loading settings...</div>
       ) : (
         <>
           <SectionContainer title="Profile" subtitle="Update your account information.">
@@ -557,6 +553,6 @@ export default function FacultySettings() {
           </SectionContainer>
         </>
       )}
-    </RoleSettingsShell>
+    </Layout>
   );
 }

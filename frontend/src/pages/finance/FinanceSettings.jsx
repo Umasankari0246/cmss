@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { roleSettingsApi } from '../../api/roleSettingsApi';
 import { getUserSession } from '../../auth/sessionController';
-import RoleSettingsShell from '../../components/role-settings/RoleSettingsShell';
+import Layout from '../../components/Layout';
 import {
   Button,
   Card,
@@ -280,12 +280,7 @@ export default function FinanceSettings() {
   }
 
   return (
-    <RoleSettingsShell
-      role="finance"
-      portalTitle="EduCore Finance Portal"
-      userName={profileData.fullName || 'Finance User'}
-      modePill="FINANCE MODE"
-    >
+    <Layout title="Settings">
       {loading ? (
         <div className="settings-load-state">Loading settings...</div>
       ) : (
@@ -466,6 +461,6 @@ export default function FinanceSettings() {
           </SectionContainer>
         </>
       )}
-    </RoleSettingsShell>
+    </Layout>
   );
 }
